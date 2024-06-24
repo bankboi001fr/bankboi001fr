@@ -32,12 +32,26 @@ local PawsConfig = {
     return UserInputService:GetMouseLocation()
     end
     
-    local function simulateMouseClick()
+local function simulateMouseClick()
+    -- Check for Mouse Input
     local mousePosition = getMousePosition()
-    VirtualInputManager:SendMouseButtonEvent(mousePosition.X, mousePosition.Y, 0, true, game, 0)
-    task.wait(0.05)
-    VirtualInputManager:SendMouseButtonEvent(mousePosition.X, mousePosition.Y, 0, false, game, 0)
+    if mousePosition and isMouseButtonPressed(0) then -- Check for left mouse button
+        VirtualInputManager:SendMouseButtonEvent(mousePosition.X, mousePosition.Y, 0, true, game, 0)
+        task.wait()
+        VirtualInputManager:SendMouseButtonEvent(mousePosition.X, mousePosition.Y, 0, false, game, 0)
+        return -- Exit function to avoid redundant tap simulation
     end
+
+    -- Check for Touch Input (if mouse input was not detected)
+    local touchPosition = getTouchPosition() -- Placeholder function
+    if touchPosition then
+        local screenPosition = convertToScreenSpace(touchPosition) 
+        VirtualInputManager:SendTouchInputBegin(0, screenPosition.X, screenPosition.Y, game)
+        task.wait()
+        VirtualInputManager:SendTouchInputEnd(0, screenPosition.X, screenPosition.Y, game)
+    end
+end
+
     
     local function isTarget()
     return Player.Character:FindFirstChild("Highlight")
